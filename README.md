@@ -55,8 +55,9 @@ course require cooperation in getting the protocol stable.
 
 ### Guidelines promoting intuitiveness ###
 
-Some parts of the implementation will be guidelines rather than hard rules. These
-are meant to make the use of the device as easy as possible and make it easy for 
-a user to switch from one x-board supporting device to another as well as to make
-it as intuitive as possible to get started with x-board.
+Alongside the protocol itself, there will be some guidelines on its implementation.
+These are guidelines rather than hard requirements. These guidelines are meant
+to make the use of the device as easy as possible and make it easy for a user to 
+switch from one x-board supporting device to another as well as to make it as 
+intuitive as possible to get started with x-board.
 
