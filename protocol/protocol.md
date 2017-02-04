@@ -3,17 +3,7 @@ Payload: 00 <operation> [<data>]
 Payload: <operation> <pin> [<data>]
 
 First byte is zero: admin operations which do not have a pin. 
-First byte is not zero: set something on a pin 
-
-00 00: reserved
-00 01: ping
-00 02: list pins
-00 03: list capabilities 
-00 04: get host version
-00 05: reboot device
-00 06 <address>: set i2c address 
-00 07 <address>: set address temporarily (lost on reboot, prevent unnecessary write) 
-00 08: reset address (undo 0 5)
+First byte is not zero: set something on a pin
 
 01 <pin> <value>: set pin to high (value == 01) or low (value == 00)
 02 <pin> <value>: PWM
