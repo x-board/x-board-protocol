@@ -76,10 +76,6 @@ List Capabilities
 them are stabilized, so they shouldn't be taken to actually mean that. Check
 the pin operation reference instead.)
 
-(This part of the protocol needs more work. The current version has problems with
-forwards compatibility when it comes to defining data sections and there has no
-thought been put into variable amounts of data.)
-
 ### The call ###
 
 The other call is to list the capabilities of a board. This call is a bit harder
@@ -163,12 +159,15 @@ and drops us back to `01`. The second drops out of that as well. The third
 signifies the end of the answer.
 
 For data, it works slightly different. If using `EF` to step in leaves you in the
-"data part" of the call, the next thing in the message is n bytes, where n is the
-number of bytes expected as data for that as call. These are the minimum values.
-Next, there are another n bytes, which represent the maximum values for this data.
-Then, you drop out of the data part and back to the command automatically. This way 
-a range of valid values is defined. If multiple ranges are valid, you can 
-immediately enter the range *again* to define the next range.
+"data part" of the call, the next thing in the message is a single byte containing
+the number of bytes of data this call takes. This could have been left out, but it
+prevents a problem with forwards compatibility. It can also help if we later decide
+to support variable length data and helps debugging. Nest, there are twice that many
+bytes. The first half is the minimum values for each of the parts of the data and
+the second half is the maximum values for each of them. Then, you drop out of the 
+data part and back to the command automatically. This way a range of valid values 
+is defined. If multiple ranges are valid, you can immediately enter the range 
+*again* to define the next range.
 
 Before I show that in another example, there's one more trick I want to introduce.
 Normally, you would use `EF` to enter the thing you just defined. This can be a 
@@ -197,22 +196,26 @@ pins.
                 EF FF
             03
                 EF
+                01
                 80
                 FF
             05
                 EF FF
             0F
                 EF
+                01
                 80
                 FF
             FF
         03
             EF
                 EF
+                02
                 00 64
                 FF C8
                 
                 EF
+                02
                 32 32
                 64 32
             FF
