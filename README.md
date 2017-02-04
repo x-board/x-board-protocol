@@ -29,7 +29,7 @@ available on those pins.
 The aim is to have newer versions of the client work well with older versions of
 the host software. This is achieved through the same methods above for supporting
 different devices. Basically, it is just like communicating with a device that
-simply supports functionality.
+simply supportsl less functionality.
 
 ### Forwards compatibility ###
 
@@ -49,7 +49,7 @@ not implemented yet.
 
 While ideas are central to the design of the protocol, the existence of an
 actual implementation is central to the stabilization of the protocol. This
-can be either be one of the host images of this project or a piece of software
+can either be one of the host images of this project or a piece of software
 or hardware developed externally. If it is an external project, it will of
 course require cooperation in getting the protocol stable.
 
