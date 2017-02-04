@@ -224,15 +224,17 @@ pins.
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01`. There, we define pin range 1-3
-and jump into it. Then we have `80` (hexadecimal for 100) as the minimum and `FF`
-(hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with
-dropping out of the data part, as that happens automatically. It's just the maximum
-value of the range. Then, we define the same range of values for pins 5-15. We can
-create a range over pins 6-9 because they don't exist. Finally, we drop out of
-`01 02` and back into `01`.
+and jump into it. Next is `01` which is the number of bytes of data this operation
+takes. Then we have `80` (hexadecimal for 100) as the minimum and `FF` (hexadecimal 
+for 255) as the maximum. Do note that this `FF` has nothing to do with dropping out 
+of the data part, as that happens automatically. It's just the maximum value of the 
+range. Then, we define the same range of values for pins 5-15. We can create a range 
+over pins 6-9 because they don't exist. Finally, we drop out of `01 02` and back 
+into `01`.
 
 Next, we enter `01 03`. Immediately, we enter again, which means we enter "all pins".
-For all pins, we define give `00` as the minimum value for value and `64` (hexadecimal
+For all pins, we start with `02` which is the number of bytes of data for the 
+operation we define give `00` as the minimum value for value and `64` (hexadecimal
 for 100) as the minimum value for frequency. Next, we define `FF` as the maximum for
 value and `C8` (hexadecimal for 200) as the maximum for frequency. In order to say
 "anything for value" we just gave it the range of 0-255. We drop out of the data
