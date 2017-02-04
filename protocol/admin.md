@@ -15,4 +15,4 @@ Here's a quick overview of what the admin operations are (planned to be)
     00 05: reboot device
     00 06 <address>: set i2c address 
     00 07 <address>: set address temporarily (lost on reboot, prevent unnecessary write) 
-    00 08: reset address (undo 0 5)
+    00 08: reset address (undo 00 05)
