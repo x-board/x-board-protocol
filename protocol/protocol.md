@@ -25,6 +25,4 @@ First byte is not zero: set something on a pin
     Blink type 01: fade using PWM (action time is length of fade) 
     Blink type 02: fade using SoftPWM (action time is length of fade)
 07 <pin> <action> <data>: set any of actions 01-06 as automatic on startup 
-08 <pin> <value> <time> <expect>: set pin to high or low after time has passed, expect no more i2c input until that time if expect is zero 
-
-Watchdog? 
+08 <pin> <value> <time> <expect>: set pin to high or low after time has passed, expect no more i2c input until that time if expect is zero  
