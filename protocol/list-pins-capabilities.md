@@ -68,3 +68,200 @@ There are several additional rules for consistency:
 
 This should all be rather intuitive, but stating it explicitly means that there is
 only a single canonical way to represent any layout of pins.
+
+List Capabilities
+-----------------
+
+(Note: I use quite a few examples of operations here. I am writing this before of
+them are stabilized, so they shouldn't be taken to actually mean that. Check
+the pin operation reference instead.)
+
+(This part of the protocol needs more work. The current version has problems with
+forwards compatibility when it comes to defining data sections and there has no
+thought been put into variable amounts of data.)
+
+### The call ###
+
+The other call is to list the capabilities of a board. This call is a bit harder
+just because there is so much more information in it.
+
+The client's call is once again pretty simple:
+
+    00 03
+
+### The response ###
+
+However, the response is more involved. It will basically just list capabilities
+of the board, using `EF` and `FF` as operators. The mode, operation and pin parts
+of a call are treated mostly the same in this response, so I will refer all three
+together as the *command*. The data part of a call is treated rather differently.
+
+The idea is simple. During the command part, you just list the byte that would be 
+used in a call to state that it's a capability of the board. Then you can use `EF`
+to "jump into" that byte and specify which parts of the byte sequence so far are
+supported, or just continue if the entire byte sequence is supported. `FF` can be
+used to terminate "go back up a level". The response is also terminated with an `FF`.
+
+If that sounded complicated, here's an example. It is for a board that supports
+only the mandatory calls.
+
+    00 EF 01 02 03 04 FF FF
+
+Or, here's the same thing formatted a little differently:
+
+    00 
+        EF
+        01
+        02
+        03
+        04
+        FF
+    FF
+    
+It starts with claiming mode `00`. Then it jumps into that mode using `EF` and
+lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins),
+`03` (list capabilities) and `04` (board version). Then, it says it's done with
+mode `00` by sending a `FF`. Finally, it says it's done by sending another `FF`.
+
+You can also more `EF`'s to go into deeper levels. On top of that, you can use
+`EF FF` to use a range instead of just a single value. Let's look at a device that
+supports the mandatory calls, `00 05` (reboot device) `00 07` (set I2C address
+temporarily) and `00 08` (reset I2C address). It also supports digital set
+(`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
+
+    00
+        EF
+        01
+            EF FF
+        05
+        07
+        08
+        FF
+    01
+        EF
+        01
+            EF
+            01
+                EF FF
+            05
+            07
+            0A
+                EF FF
+            14
+            FF
+        FF
+    FF
+
+In this example, we start by defining what we can do in mode `00`. There we can
+do the range from `01` to `05`, `07` and `08`. The `FF` signifies that we're done
+with mode `00`.
+
+Next up is mode `01`, here we look at operation `01` and enter it using `EF`. We
+support this operation on the pin range 1 to 5, the pin 7 and the pin range 10 to
+20 (in hexadecimal). Finally, there are three `FF`'s. The first is to exit `01 01`
+and drops us back to `01`. The second drops out of that as well. The third
+signifies the end of the answer.
+
+For data, it works slightly different. If using `EF` to step in leaves you in the
+"data part" of the call, the next thing in the message is n bytes, where n is the
+number of bytes expected as data for that as call. These are the minimum values.
+Next, there are another n bytes, which represent the maximum values for this data.
+Then, you drop out of the data part and back to the command automatically. This way 
+a range of valid values is defined. If multiple ranges are valid, you can 
+immediately enter the range *again* to define the next range.
+
+Before I show that in another example, there's one more trick I want to introduce.
+Normally, you would use `EF` to enter the thing you just defined. This can be a 
+single or a range. However, you can also use it to mean "everything". This is done
+by using `EF` to step in without having defined what to step into.
+
+Alright, let's put it into practice. Here, we have a board with pins 0-5 and 10-15
+that supports `01 02`(PWM which has one byte of data) on pin 1-3 but only values
+of 128 or higher and supports PWM fully on ports 5 and 10-15. It also supports
+`01 03` (SoftPWM which has two bytes of data, a value and a frequency) with any value
+on frequency 100-200 on all pins and with values 50-100 on frequency 50 also on all
+pins.
+
+    00
+        EF
+        01
+        02
+        03
+        04
+        FF
+    01
+        EF
+        02
+            EF
+            01
+                EF FF
+            03
+                EF
+                80
+                FF
+            05
+                EF FF
+            0F
+                EF
+                80
+                FF
+            FF
+        03
+            EF
+                EF
+                00 64
+                FF C8
+                
+                EF
+                32 32
+                64 32
+            FF
+        FF
+    FF
+
+As always, we start off with the obligatory calls. After we exit mode `00`, we enter
+mode `01` and immediately continue to operation `011. There, we define pin range 1-3
+and jump into it. Then we have `80` (hexadecimal for 100) as the minimum and `FF`
+(hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with
+dropping out of the data part, as that happens automatically. It's just the maximum
+value of the range. Then, we define the same range of values for pins 5-15. We can
+create a range over pins 6-9 because they don't exist. Finally, we drop out of
+`01 02` and back into `01`.
+
+Next, we enter `01 03`. Immediately, we enter again, which means we enter "all pins".
+For all pins, we define give `00` as the minimum value for value and `64` (hexadecimal
+for 100) as the minimum value for frequency. Next, we define `FF` as the maximum for
+value and `C8` (hexadecimal for 200) as the maximum for frequency. In order to say
+"anything for value" we just gave it the range of 0-255. We drop out of the data
+block automatically and enter it again immediately to define another range. This time
+we define a single value for the frequency by giving it the range of 32-32. Then, we
+drop out of everything we're still in, and then close off the response with `FF`.
+
+### Rules about skipping and jumping ###
+
+Before we can wrap this up, there are some rules that should be mentioned.
+
+If there are multiple modes that have the same operations, (e.g. `02` SET and
+`03` SET DEFAULT) you can skip any of them beyond the first by `EF`-stepping into
+them. This means that for that mode, you support exactly the same for this mode 
+as for the last mode with the same possibilities. This can greatly reduce the
+size of your response. You're not allowed to not do `EF` on a mode in any other
+situation, and you may not use double `EF` (to define things for all operations
+in a mode) on a mode in any situation. This is because later versions of the
+protocol may always support more operations for that mode. On top of that, stepping
+into everything of a mode just doesn't make much sense.
+
+For a partial operation, you may both skip jumping in to state you support all its 
+child operations and jump into all if all children have the same amount of remaining
+operations and the same number of bytes of data. For both, though, you may only do
+this if the partial state is officially stable. Such a stabilization is a promise
+that the partial state won't get any new children. It is separate from all its
+children being stabilized (because even then it could get another child) but can
+of course only happen if all children are stable.
+
+For complete command, you can always skip the data (no `EF`) to allow anything the
+protocol allows, but never jump in for everything (double `EF`) because the
+data is always the last step. Commands that don't take data should of course
+never be stepped into. For a command that is have a complete operation and still
+need a pins you can either skip (no `EF`: "any data on any pin") or jump in for
+everything (double `EF`: "this data on any pin").
