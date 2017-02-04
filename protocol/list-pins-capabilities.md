@@ -220,7 +220,7 @@ pins.
     FF
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
-mode `01` and immediately continue to operation `011. There, we define pin range 1-3
+mode `01` and immediately continue to operation `01`. There, we define pin range 1-3
 and jump into it. Then we have `80` (hexadecimal for 100) as the minimum and `FF`
 (hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with
 dropping out of the data part, as that happens automatically. It's just the maximum
@@ -259,9 +259,32 @@ that the partial state won't get any new children. It is separate from all its
 children being stabilized (because even then it could get another child) but can
 of course only happen if all children are stable.
 
-For complete command, you can always skip the data (no `EF`) to allow anything the
+For a complete command, you can always skip the data (no `EF`) to allow anything the
 protocol allows, but never jump in for everything (double `EF`) because the
 data is always the last step. Commands that don't take data should of course
 never be stepped into. For a command that is have a complete operation and still
 need a pins you can either skip (no `EF`: "any data on any pin") or jump in for
 everything (double `EF`: "this data on any pin").
+
+### The canonical response ###
+
+There are usually multiple ways to write a response for the same set of functionality.
+There are rules for picking the canonical response. A board should always (try to)
+give the canonical response. These rules are:
+
+- Always pick the response that takes the lowest number of bytes
+
+- If the number of bytes is the same, use the one that has the lower values
+  (this translate into "prefer enumerations over ranges in such cases")
+
+- If parts of the content can change places (without increasing the total size). Sort
+  them by their values. When two ranges start at the same value, use do the shorter
+  range first. Otherwise, just sort them lexicographically (i.e. first byte vs first
+  byte, move to next byte in case of a tie, no more bytes is lower than any byte value)
+
+A client should actually support any non-canonical responses as well. This is because
+it can be easy to accidentally provide a non-canonical response. Moreover, the canonical
+answer can sometimes even change based on outside factors (when finalizing a partial
+operation without giving it more children makes a shortcut possible). On top of that,
+this also reduces the chance of missing a corner case that resulted in a shorter
+response.
