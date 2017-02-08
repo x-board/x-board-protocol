@@ -29,8 +29,9 @@ A way of supporting variable amounts of data is still being looked at.
 Modes: 00
 ---------
 
-The mode 00 is the admin mode and represents calls that are done on the device instead
-of on one of its pins. All other currently planned modes are pin-based.
+The mode 00 is the [admin mode](admin-operations.md) and represents calls that are done 
+on the device instead of on one of its pins. All other currently planned modes are
+[pin-based](pin-operations.md).
 
 Mandatory operations
 --------------------
@@ -47,13 +48,15 @@ is used by an x-board board.
     00 02: List pins
 
 This operation requests for the board to identify which pins are available. This only includes
-available pins, so not ones that are - for example - in use by I2C.
+available pins, so not ones that are - for example - in use by I2C. The response to this call
+is specified on the [list pins and capabilities page](list-pins-operations.md).
 
     00 03: List capabilities
     
 This operation is the crux of having a protocol based on optional functionality. By calling
 this function, the device can ask the board what it supports. The board must respond with a 
-listing of what functionality it supports on which pins.
+listing of what functionality it supports on which pins. There is an extensive specification
+of the response to this call on the [list pins and capabilities page](list-pins-operations.md).
 
     00 04: Board host version
 

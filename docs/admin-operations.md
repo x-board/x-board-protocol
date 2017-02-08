@@ -17,3 +17,6 @@ Here's a quick overview of what the admin operations are (planned to be)
     00 07 <address>: set i2c address 
     00 08 <address>: set address temporarily (lost on reboot, prevent unnecessary write) 
     00 09: reset address (undo 00 05)
+
+For more information on `00 02` and `00 03` see the 
+[list pins and operations page](list-pins-operations.md).
