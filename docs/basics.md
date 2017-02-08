@@ -58,7 +58,12 @@ this function, the device can ask the board what it supports. The board must res
 listing of what functionality it supports on which pins. There is an extensive specification
 of the response to this call on the [list pins and capabilities page](list-pins-operations.md).
 
-    00 04: Board host version
+    00 04: Board identifier
+    
+The board should respond with an identifier that represents the hardware of the board. What
+this should exactly be should be worked out and written down.
+
+    00 05: Board host version
 
 The board should respond with its version. This version should be different if the capabilities
 of this same board have changed. This most commonly happen for a change in software, but should
