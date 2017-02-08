@@ -19,4 +19,4 @@ Here's a quick overview of what the admin operations are (planned to be)
     00 09: reset address (undo 00 05)
 
 For more information on `00 02` and `00 03` see the 
-[list pins and operations page](list-pins-operations.md).
+[list pins and capabilities page](list-pins-capabilities.md).

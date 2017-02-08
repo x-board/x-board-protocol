@@ -49,14 +49,14 @@ is used by an x-board board.
 
 This operation requests for the board to identify which pins are available. This only includes
 available pins, so not ones that are - for example - in use by I2C. The response to this call
-is specified on the [list pins and capabilities page](list-pins-operations.md).
+is specified on the [list pins and capabilities page](list-pins-capabilities.md).
 
     00 03: List capabilities
     
 This operation is the crux of having a protocol based on optional functionality. By calling
 this function, the device can ask the board what it supports. The board must respond with a 
 listing of what functionality it supports on which pins. There is an extensive specification
-of the response to this call on the [list pins and capabilities page](list-pins-operations.md).
+of the response to this call on the [list pins and capabilities page](list-pins-capabilities.md).
 
     00 04: Board identifier
     
