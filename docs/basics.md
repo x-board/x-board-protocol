@@ -2,6 +2,37 @@
 The basics of the protocol
 ==========================
 
+Wrapped in I2C
+--------------
+
+The protocol is defined in the terms of messages and response. However, I2C doesn't
+know either of these concepts. As such, the real protocol is wrapped in I2C. This is
+done in the following way.
+
+A I2C Master calls the board in one of the following way:
+
+    START Write (message) STOP
+    START Write (message) START Read 1 byte START Read x bytes STOP
+
+The first variant is for when the client doesn't expect an answer. The second is for
+the case where the client expects an answer. The first read retrieves the length of
+the response, the second read retrieves the response itself and will be as long
+as the values read earlier. There may be a way to designate a length that is higher
+than 255 in a process that takes multiple reads. However, that hasn't been defined
+yet, but we can state that for the moment `FF` isn't a valid length.
+
+When a message doesn't have a response and the client does not ask for one, the
+board should simply respond with a length of zero. It's also valid for the client not
+to request a response even though the call should generate one. This is all meant to
+provide good backwards and forwards compatibility.
+
+The protocol is defined in terms of the happy flow only. When the client software does
+not follow the protocol (e.g. does a read without a preceding write), it doesn't 
+matter what the board responds with. The board should, though, follow the protocol
+again as soon as the client follows the protocol again. Of course, it's nice if the
+behaviour is consistent and just always responding with zeroes is the recommended
+strategy. However, efficient implementation of the protocol comes first.
+
 Message format
 --------------
 
