@@ -17,6 +17,7 @@ For now, here's a list of the pages that make up the protocol definition:
 
 - [Design goals](goals.md) that drive the protocol development
 - [The basics](basics.md)
+- [Mandatory operations](mandatory.md) which should be implemented by every board.
 - [The admin operations](admin-operations.md)
   - [Listing pins and capabilities](list-pins-capabilities.md)
 - [The pin operations](pin-operations.md)
