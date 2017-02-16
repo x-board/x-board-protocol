@@ -5,11 +5,11 @@ The basics of the protocol
 Wrapped in I2C
 --------------
 
-The protocol is defined in the terms of messages and response. However, I2C doesn't
-know either of these concepts. As such, the real protocol is wrapped in I2C. This is
-done in the following way.
+The protocol is defined in the terms of messages and responses. However, I2C doesn't
+know either of these concepts. As such, the real protocol is wrapped in I2C. This
+paragraph outlines how this is done.
 
-A I2C Master calls the board in one of the following way:
+A I2C Master calls the board in one of the following ways:
 
     START Write (message) STOP
     START Write (message) START Read 1 byte START Read x bytes STOP
@@ -21,7 +21,7 @@ as the values read earlier. There may be a way to designate a length that is hig
 than 255 in a process that takes multiple reads. However, that hasn't been defined
 yet, but we can state that for the moment `FF` isn't a valid length.
 
-When a message doesn't have a response and the client does not ask for one, the
+When a message doesn't have a response and the client does ask for one, the
 board should simply respond with a length of zero. It's also valid for the client not
 to request a response even though the call should generate one. This is all meant to
 provide good backwards and forwards compatibility.
@@ -41,7 +41,7 @@ The format of a message is this:
     <mode> <operation*> [<pin>] [<data*>]
 
 Here, a value `<in angular brackets>` represent a single byte value, while a similar
-value with an `<added asterisk>` represents a values of one or more bytes. 
+value with an `<added asterisk*>` represents a value of one or more bytes. 
 `[Recangular brackets]` mean that the value optional.
 
 The length of a message is always dictated by the protocol. No operation can be the
