@@ -7,17 +7,17 @@ Wrapped in I2C
 
 The protocol is defined in the terms of messages and responses. However, I2C doesn't
 know either of these concepts. As such, the real protocol is wrapped in I2C. This
-paragraph outlines how this is done.
+first part outlines how this is done.
 
-A I2C Master calls the board in one of the following ways:
+An I2C Master calls the board in one of the following ways:
 
     START Write (message) STOP
     START Write (message) START Read 1 byte START Read x bytes STOP
 
 The first variant is for when the client doesn't expect an answer. The second is for
-the case where the client expects an answer. The first read retrieves the length of
+the case where the client does expect an answer. The first read retrieves the length of
 the response, the second read retrieves the response itself and will be as long
-as the values read earlier. There may be a way to designate a length that is higher
+as the value read earlier. There may be a way to designate a length that is higher
 than 255 in a process that takes multiple reads. However, that hasn't been defined
 yet, but we can state that for the moment `FF` isn't a valid length.
 

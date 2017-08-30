@@ -62,8 +62,8 @@ There are several additional rules for consistency:
 - Ranges should always go from the lower pin number to a higher one. So, the first
   number of a pair should always be lower than the second or the same.
 - There should be no overlap between two separate ranges.
-- The ranges should always be as long as possible. So, a response of `00 33 44 77 FF`
-  is not valid and should be replaced with `00 77 FF`.
+- The ranges should always be as long as possible. So, a response of `00 03 04 05 07 FF`
+  is not valid and should be replaced with `00 07 FF`.
 - Ranges should be listed from low to high.
 
 This should all be rather intuitive, but stating it explicitly means that there is
@@ -72,8 +72,8 @@ only a single canonical way to represent any layout of pins.
 List Capabilities
 -----------------
 
-(Note: I use quite a few examples of operations here. I am writing this before of
-them are stabilized, so they shouldn't be taken to actually mean that. Check
+(Note: I use quite a few examples of operations here. I am writing this before
+they are stabilized, so they shouldn't be taken to actually mean that. Check
 the pin operation reference instead.)
 
 ### The call ###
@@ -99,7 +99,7 @@ supported, or just continue if the entire byte sequence is supported. `FF` can b
 used to terminate "go back up a level". The response is also terminated with an `FF`.
 
 If that sounded complicated, here's an example. It is for a board that supports
-only the mandatory calls.
+only `00 01`, `00 02`, `00 03` and `00 04`. (This is less than the mandatory calls.)
 
     00 EF 01 02 03 04 FF FF
 
@@ -116,12 +116,13 @@ Or, here's the same thing formatted a little differently:
     
 It starts with claiming mode `00`. Then it jumps into that mode using `EF` and
 lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins),
-`03` (list capabilities) and `04` (board version). Then, it says it's done with
-mode `00` by sending a `FF`. Finally, it says it's done by sending another `FF`.
+`03` (list capabilities) and `04` (board identifier). Then, it 
+says it's done with mode `00` by sending a `FF`. Finally, it says it's done by sending
+another `FF`.
 
 You can also more `EF`'s to go into deeper levels. On top of that, you can use
 `EF FF` to use a range instead of just a single value. Let's look at a device that
-supports the mandatory calls, `00 05` (reboot device) `00 07` (set I2C address
+supports the mandatory calls, `00 07` (set I2C address) `00 08` (set I2C address
 temporarily) and `00 08` (reset I2C address). It also supports digital set
 (`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
 
@@ -162,7 +163,7 @@ For data, it works slightly different. If using `EF` to step in leaves you in th
 "data part" of the call, the next thing in the message is a single byte containing
 the number of bytes of data this call takes. This could have been left out, but it
 prevents a problem with forwards compatibility. It can also help if we later decide
-to support variable length data and helps debugging. Nest, there are twice that many
+to support variable length data and helps debugging. Next, there are twice that many
 bytes. The first half is the minimum values for each of the parts of the data and
 the second half is the maximum values for each of them. Then, you drop out of the 
 data part and back to the command automatically. This way a range of valid values 
@@ -184,9 +185,9 @@ pins.
     00
         EF
         01
-        02
-        03
-        04
+            EF
+            FF
+        05
         FF
     01
         EF
@@ -215,7 +216,7 @@ pins.
                 FF C8
                 
                 EF
-                02
+                02 
                 32 32
                 64 32
             FF
@@ -225,7 +226,7 @@ pins.
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01`. There, we define pin range 1-3
 and jump into it. Next is `01` which is the number of bytes of data this operation
-takes. Then we have `80` (hexadecimal for 100) as the minimum and `FF` (hexadecimal 
+takes. Then we have `80` (hexadecimal for 128) as the minimum and `FF` (hexadecimal 
 for 255) as the maximum. Do note that this `FF` has nothing to do with dropping out 
 of the data part, as that happens automatically. It's just the maximum value of the 
 range. Then, we define the same range of values for pins 5-15. We can create a range 
@@ -267,7 +268,7 @@ of course only happen if all children are stable.
 For a complete command, you can always skip the data (no `EF`) to allow anything the
 protocol allows, but never jump in for everything (double `EF`) because the
 data is always the last step. Commands that don't take data should of course
-never be stepped into. For a command that is have a complete operation and still
+never be stepped into. For a command that does have a complete operation and still
 need a pins you can either skip (no `EF`: "any data on any pin") or jump in for
 everything (double `EF`: "this data on any pin").
 

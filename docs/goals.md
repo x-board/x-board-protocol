@@ -22,7 +22,7 @@ Backwards compatibility
 The aim is to have newer versions of the client work well with older versions of
 the host software. This is achieved through the same methods above for supporting
 different devices. Basically, it is just like communicating with a device that
-simply supportsl less functionality.
+simply supports less functionality.
 
 Forwards compatibility
 ----------------------
@@ -40,14 +40,14 @@ just the ideas of what one could do with such a board. This means that there may
 very well be gaps in what is implemented that are caused by ideas that are just
 not implemented yet.
 
-Implementation-based  stabilization
+Implementation-based stabilization
 -----------------------------------
 
 While ideas are central to the design of the protocol, the existence of an
 actual implementation is central to the stabilization of the protocol. This
 can either be one of the host images of this project or a piece of software
 or hardware developed externally. If it is an external project, it will of
-course require cooperation in getting the protocol stable.
+course require cooperation with the project in getting the protocol stable.
 
 Guidelines promoting intuitiveness
 ----------------------------------
