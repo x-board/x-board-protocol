@@ -255,6 +255,11 @@ in a mode) on a mode in any situation. This is because later versions of the
 protocol may always support more operations for that mode. On top of that, stepping
 into everything of a mode just doesn't make much sense.
 
+(I am aware that the above piece isn't very clear. I don't even know what it says,
+despite the fact that I was the one who wrote it. I plan to redesign and then
+rewrite this functionality. The functionality should still be present and I actually
+also want it to apply to (partial) operations.)
+
 For a partial operation, you may both skip jumping in to state you support all its 
 child operations and jump into all if all children have the same amount of remaining
 operations and the same number of bytes of data. For both, though, you may only do
