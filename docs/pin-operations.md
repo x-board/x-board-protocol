@@ -16,7 +16,15 @@ Mode 01 is "SET" and sets pins to a certain state. This is planned to be somethi
         Blink type 01: fade using PWM (action time is length of fade) 
         Blink type 02: fade using SoftPWM (action time is length of fade)
 
-Mode 02 is "SET DEFAULT". Its usage is the same as 01, but instead of seting the pin to a state
+There are some changes I have planned here, but not worked out yet. The idea is to move the 
+blink type to be the second byte of the operation. Likewise, PWM and SoftPWM will share the first
+byte of their operation, only being differentiated by the second byte. Fade to value will sport a
+similar system where they share a byte of the operation. Additionally, I want to define a lot of
+"equivalences" here that allow parts of the capabilities response to be skipped because they will
+be equal to another part. I am also considering adding a "your best PWM" operation, which defaults
+to PWM for PWM capable pins, but falls back to SoftPWM when PWM is not available.
+
+Mode 02 is "SET DEFAULT". Its usage is the same as 01, but instead of setting the pin to a state
 right now, sets what the default is, which is triggered when the board is powered up.
 
 Mode 03 is "DELAYED SIGNAL". A definite use case is to connect it to the power-on of your system,
