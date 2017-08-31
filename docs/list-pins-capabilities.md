@@ -164,11 +164,11 @@ For data, it works slightly different. If using `EF` to step in leaves you in th
 the number of bytes of data this call takes. This could have been left out, but it
 prevents a problem with forwards compatibility. It can also help if we later decide
 to support variable length data and helps debugging. Next, there are twice that many
-bytes. The first half is the minimum values for each of the parts of the data and
-the second half is the maximum values for each of them. Then, you drop out of the 
-data part and back to the command automatically. This way a range of valid values 
-is defined. If multiple ranges are valid, you can immediately enter the range 
-*again* to define the next range.
+bytes. These are pairs of bytes, each representing a byte of the data part. The first
+byte is the minimum value for that byte, the second is the maximum value.
+After that, you drop out of the data part and back to the command automatically. 
+This way a range of valid values is defined. If multiple ranges are valid, you can 
+immediately enter the range *again* to define the next range.
 
 Before I show that in another example, there's one more trick I want to introduce.
 Normally, you would use `EF` to enter the thing you just defined. This can be a 
@@ -198,27 +198,25 @@ pins.
             03
                 EF
                 01
-                80
-                FF
+                80 FF
             05
                 EF FF
             0F
                 EF
                 01
-                80
-                FF
+                80 FF
             FF
         03
             EF
                 EF
                 02
-                00 64
-                FF C8
+                00 FF
+                64 C8
                 
                 EF
                 02 
+                32 64
                 32 32
-                64 32
             FF
         FF
     FF
