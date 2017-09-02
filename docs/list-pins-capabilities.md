@@ -159,14 +159,14 @@ support this operation on the pin range 1 to 5, the pin 7 and the pin range 10 t
 and drops us back to `01`. The second drops out of that as well. The third
 signifies the end of the answer.
 
-For data, it works slightly different. If using `EF` to step in leaves you in the
-"data part" of the call, the next thing in the message is a single byte containing
-the number of bytes of data this call takes. This could have been left out, but it
-prevents a problem with forwards compatibility. It can also help if we later decide
-to support variable length data and helps debugging. Next, there are twice that many
-bytes. These are pairs of bytes, each representing a byte of the data part. The first
-byte is the minimum value for that byte, the second is the maximum value.
-After that, you drop out of the data part and back to the command automatically. 
+For data, it works slightly different. When you step into the data part of an operation,
+you do so with the sequence of `DF EF` instead of just `EF`. The next thing in the message
+is a single byte containing the number of bytes of data this call takes. All of this is 
+done with the question of forwards compatibility in mind; this way, the client does not 
+have to know about details of the protocol that may be added after the client was created. 
+Next, there are twice that many bytes. These are pairs of bytes, each representing a byte of
+the data part. The first byte is the minimum value for that byte, the second is the maximum 
+value. After that, you drop out of the data part and back to the command automatically. 
 This way a range of valid values is defined. If multiple ranges are valid, you can 
 immediately enter the range *again* to define the next range.
 
@@ -201,24 +201,24 @@ pins.
             01
                 EF FF
             03
-                EF
+                DF EF
                 01
                 80 FF
             05
                 EF FF
             0F
-                EF
+                DF EF
                 01
                 80 FF
             FF
         03
             EF
-                EF
+                DF EF
                 02
                 00 FF
                 64 C8
                 
-                EF
+                DF EF
                 02 
                 32 64
                 32 32
@@ -228,12 +228,12 @@ pins.
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01`. There, we define pin range 1-3
-and jump into it. Next is `01` which is the number of bytes of data this operation
-takes. Then we have `80` (hexadecimal for 128) as the minimum and `FF` (hexadecimal 
-for 255) as the maximum. Do note that this `FF` has nothing to do with dropping out 
-of the data part, as that happens automatically. It's just the maximum value of the 
-range. Then, we define the same range of values for pins 5-15. We can create a range 
-over pins 6-9 because they don't exist. Finally, we drop out of `01 02` and back 
+and jump into the data part with `DF EF`. Next is `01` which is the number of bytes of 
+data this operation takes. Then we have `80` (hexadecimal for 128) as the minimum and 
+`FF` (hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with 
+dropping out of the data part, as that happens automatically. It's just the maximum value
+of the range. Then, we define the same range of values for pins 5-15. We can create a
+range over pins 6-9 because they don't exist. Finally, we drop out of `01 02` and back 
 into `01`.
 
 Next, we enter `01 03`. Immediately, we enter again, which means we enter "all pins".
