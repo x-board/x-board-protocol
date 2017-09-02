@@ -170,11 +170,6 @@ value. After that, you drop out of the data part and back to the command automat
 This way a range of valid values is defined. If multiple ranges are valid, you can 
 immediately enter the range *again* to define the next range.
 
-(Note that the above will need a redesign. The current version needs to know the length
-of every operation, which is slated not to be constant but a part of the protocol.
-This means that under the current design, the client can't be forward compatible, which
-is not the intended result! I am considering using `DF` as a third special value.)
-
 Before I show that in another example, there's one more trick I want to introduce.
 Normally, you would use `EF` to enter the thing you just defined. This can be a 
 single or a range. However, you can also use it to mean "everything". This is done
