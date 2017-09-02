@@ -249,12 +249,12 @@ drop out of everything we're still in, and then close off the response with `FF`
 
 ### Identical parts of the protocol ###
 
-There may be different parts of the protocol which have similar hardware requirements.
-In such cases, they will be listed as part of the protocol as "identical". Instead of
-stepping into such a part of the protocol, you can instead use `DF` to declare that
-any of its content is the same last element this was related to. The `DF` is then
-followed by the part of the protocol for which you are using the fact they are identical,
-which is then closed off with a `FF`.
+There may be different parts of the protocol which have similar hardware requirements
+and take the same arguments. In such cases, they will be listed as part of the protocol 
+as "identical". Instead of stepping into such a part of the protocol, you can instead 
+use `DF` to declare that any of its content is the same last element this was related to.
+The `DF` is then followed by the part of the protocol for which you are using the fact
+they are identical, which is then closed off with a `FF`.
 
 An example of where such a relationship may be defined is modes `01` and `02`. The one
 sets the value of a pin and the other sets a default for that pin when the board is
@@ -323,7 +323,6 @@ and `0F` in hexadecimal respectively). Finally, it uses the copying mechanic aga
 `03` to state it supports setting a default in exactly the same way as it supports setting pins
 right now.
 
-
     00
         EF
         01
@@ -359,6 +358,135 @@ This example defines the mandatory operations, as well as PWM on pins 1 through 
 as well as SoftPWM on pins 1 through 5 (with any data as well). For the set default, it uses the
 copying mechanic to state that it supports PWM in the same way, without stating it supports other
 things (here: SoftPWM) for set default.
+
+### Similar parts of the protocol ###
+
+When the hardware requirements are similar, but the call takes different arguments, it can be
+declared as similar. This has the same goal as things being marked as identical, but it works
+slightly differently.
+
+Just like for identical parts, it is started by `DF`, followed by the part it is similar to.
+However, the next thing is `EF`. That is followed by a data definition, just like when providing
+a normal definition of what data is allowed. So, it starts off with the [length](basics.md#lengths)
+of the data, followed by that many pairs of minimum and maximum values for each of those bytes.
+The protocol will define how the similar base is combined with new data, as well as how many bytes
+the new data should be.
+
+Let's make that clear by providing an example. We'll use `01 02 01` which is analog set using PWM
+and `01 03` which is fade to value. `01 03` is defined to be similar to `01 02`. It expects one byte
+of data when combining: time. In the combination process, it uses the allowed values for "value"
+from `01 02` and uses them as the allowed values for both "from-value" and "to-value". It then adds
+the new time value to get all defined data values.
+
+    00
+        EF
+        01
+            EF
+            FF
+        05
+        FF
+    01
+        EF
+        02
+            EF
+            01
+                EF
+                01
+                    EF FF
+                03
+                FF
+            FF
+        03
+            DF 01 01 EF
+            01
+            01 0A
+    FF
+
+Here, we define the standard operations and PWM with any value on pins 1 through 3. Then, it uses the
+similarity to define fading from any value to any value with time within 1 and 10.
+
+Instead of the `DF .. EF` sequence, the `DF .. DF FF` can be used. In this case, you aren't stepping
+into the data part. This means that all possible values are allowed for the values that would be defined
+for on top of the similarity.
+
+    00
+        EF
+        01
+            EF
+            FF
+        05
+        FF
+    01
+        EF
+        02
+            EF
+            01
+                EF
+                01
+                    EF FF
+                03
+                    DF EF
+                    01
+                    00 80
+                FF
+            FF
+        03
+            DF 01 01 DF FF
+    FF
+
+Here, we define the standard operations and PWM with values up to 128 on pins 1 through 3. 
+Then, it uses the similarity to define fading from any value up to 128 to any value up to 
+128 with any value for time.
+
+Similarity is transitive, like being identical is. This means that it can be used on
+full (or larger partial) operation when a partial operation is defined as similar. It can
+also be used for different pins or pin ranges like is the case identical parts, in the
+case of pin ranges, you use the first pin here as well. However, pin ranges within the
+same operation aren't automatically similar like how they are automatically the same.
+
+Unlike is the case when copying identical parts, similarities are directional. This
+means that they should always be used from the similar operation to the original.
+If possible, it should point to the original operation, not to something that is
+identical to it, even if the original one is simply defined as a copy of the identical
+property. 
+
+If this is not possible, you can use a different syntax instead. This starts with a `DF` as
+always, but is then followed by the operation or partial operation that the current one
+is similar to. This is always the (partial) operation on which the similarity is defined,
+even if you are at a deeper level. That is then followed by another `DF` and the
+(partial) operation it is identical to (on which being identical is defined), a third
+`DF` and finally the part you want to copy. If these last two parts are the same, one of
+the two may be left out together with a `DF`. This is all closed by either `EF` or `DF FF`
+same as above.
+
+In summary, all of the following are possible:
+
+    # This is similar to 01 01 with the following additional data
+    DF 01 01 EF
+    
+    # This is similar to 01 01 with any additional data
+    DF 01 01 DF FF
+    
+    # 01 01 is identical 02 02 and this is similar to 02 02 with the following additional data
+    DF 01 01 
+    DF 02 02 EF
+    
+    # 01 01 is identical 02 02 and this is similar to 02 02 with any additional data
+    DF 01 01 
+    DF 02 02 DF FF
+    
+    # 01 01 is identical 02 02 and this is similar to 02 02 01 with the following additional data
+    DF 01 01 
+    DF 02 02 
+    DF 02 02 01 EF
+    
+    # 01 01 is identical 02 02 and this is similar to 02 02 01 with any additional data
+    DF 01 01
+    DF 02 02
+    DF 02 02 01 DF FF
+
+For the later options, it's worth checking if using this actually saves data over just repeating
+the definition. If it doesn't, using it won't give you the [the canonical response](the-canonical-response)
 
 ### The canonical response ###
 
