@@ -36,7 +36,7 @@ given methods as if they aren't there.
 EF and FF
 ---------
 
-The values `EF` and `FF` are not valid modes, aren't valid parts of operations and
+The values `DF`, `EF` and `FF` are not valid modes, aren't valid parts of operations and
 aren't valid pin numbers. This is all so they can be used in these calls to represent
 other things.
 
@@ -88,7 +88,7 @@ The client's call is once again pretty simple:
 ### The response ###
 
 However, the response is more involved. It will basically just list capabilities
-of the board, using `EF` and `FF` as operators. The mode, operation and pin parts
+of the board, using `DF`, `EF` and `FF` as operators. The mode, operation and pin parts
 of a call are treated mostly the same in this response, so I will refer all three
 together as the *command*. The data part of a call is treated rather differently.
 

@@ -19,7 +19,7 @@ the case where the client does expect an answer. The first read retrieves the le
 the response, the second read retrieves the response itself and will be as long
 as the value read earlier. There may be a way to designate a length that is higher
 than 255 in a process that takes multiple reads. However, that hasn't been defined
-yet, but we can state that for the moment `FF` isn't a valid length.
+yet, but we can state that for the moment `EF`, `DF` and`FF` aren't a valid length.
 
 When a message doesn't have a response and the client does ask for one, the
 board should simply respond with a length of zero. It's also valid for the client not
@@ -42,7 +42,7 @@ The format of a message is this:
 
 Here, a value `<in angular brackets>` represent a single byte value, while a similar
 value with an `<added asterisk*>` represents a value of one or more bytes. 
-`[Recangular brackets]` mean that the value optional.
+`[Rectangular brackets]` mean that the value optional.
 
 The length of a message is always dictated by the protocol. No operation can be the
 same as the first part of another operation. In other words, if you've read a part
@@ -52,7 +52,7 @@ a pin number is present is defined by the combination of mode and operation
 (though currently you can tell just by looking at the mode). The amount of data
 that goes with an operation is also defined by the combination of mode and operation.
 
-The bytes EF and FF are not valid for use in the mode, the operation or the pin.
+The bytes `DF`, `EF` and `FF` are not valid for use in the mode, the operation or the pin.
 They are valid for use in data bytes.
 
 A way of supporting variable amounts of data is still being looked at.
