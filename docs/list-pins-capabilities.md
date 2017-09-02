@@ -33,10 +33,10 @@ capabilities that it doesn't know about. It may of course let the user know that
 client doesn't support all capabilities of the board, but it should just treat the
 given methods as if they aren't there.
 
-EF and FF
+FE and FF
 ---------
 
-The values `DF`, `EF` and `FF` are not valid modes, aren't valid parts of operations and
+The values `FD`, `FE` and `FF` are not valid modes, aren't valid parts of operations and
 aren't valid pin numbers. This is all so they can be used in these calls to represent
 other things.
 
@@ -88,12 +88,12 @@ The client's call is once again pretty simple:
 ### The response ###
 
 However, the response is more involved. It will basically just list capabilities
-of the board, using `DF`, `EF` and `FF` as operators. The mode, operation and pin parts
+of the board, using `FD`, `FE` and `FF` as operators. The mode, operation and pin parts
 of a call are treated mostly the same in this response, so I will refer all three
 together as the *command*. The data part of a call is treated rather differently.
 
 The idea is simple. During the command part, you just list the byte that would be 
-used in a call to state that it's a capability of the board. Then you can use `EF`
+used in a call to state that it's a capability of the board. Then you can use `FE`
 to "jump into" that byte and specify which parts of the byte sequence so far are
 supported, or just continue if the entire byte sequence is supported. `FF` can be
 used to terminate "go back up a level". The response is also terminated with an `FF`.
@@ -101,12 +101,12 @@ used to terminate "go back up a level". The response is also terminated with an 
 If that sounded complicated, here's an example. It is for a board that supports
 only `00 01`, `00 02`, `00 03` and `00 04`. (This is less than the mandatory calls.)
 
-    00 EF 01 02 03 04 FF FF
+    00 FE 01 02 03 04 FF FF
 
 Or, here's the same thing formatted a little differently:
 
     00 
-        EF
+        FE
         01
         02
         03
@@ -114,37 +114,37 @@ Or, here's the same thing formatted a little differently:
         FF
     FF
     
-It starts with claiming mode `00`. Then it jumps into that mode using `EF` and
+It starts with claiming mode `00`. Then it jumps into that mode using `FE` and
 lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins),
 `03` (list capabilities) and `04` (board identifier). Then, it 
 says it's done with mode `00` by sending a `FF`. Finally, it says it's done by sending
 another `FF`.
 
-You can also more `EF`'s to go into deeper levels. Even if an operation is multiple
-bytes, you will always use `EF` to step into a single byte. On top of that, you can use
-`EF FF` to use a range instead of just a single value. Let's look at a device that
+You can also more `FE`'s to go into deeper levels. Even if an operation is multiple
+bytes, you will always use `FE` to step into a single byte. On top of that, you can use
+`FE FF` to use a range instead of just a single value. Let's look at a device that
 supports the mandatory calls, `00 07` (set I2C address) `00 08` (set I2C address
 temporarily) and `00 08` (reset I2C address). It also supports digital set
 (`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
 
     00
-        EF
+        FE
         01
-            EF FF
+            FE FF
         05
         07
         08
         FF
     01
-        EF
+        FE
         01
-            EF
+            FE
             01
-                EF FF
+                FE FF
             05
             07
             0A
-                EF FF
+                FE FF
             14
             FF
         FF
@@ -154,14 +154,14 @@ In this example, we start by defining what we can do in mode `00`. There we can
 do the range from `01` to `05`, `07` and `08`. The `FF` signifies that we're done
 with mode `00`.
 
-Next up is mode `01`, here we look at operation `01` and enter it using `EF`. We
+Next up is mode `01`, here we look at operation `01` and enter it using `FE`. We
 support this operation on the pin range 1 to 5, the pin 7 and the pin range 10 to
 20 (in hexadecimal). Finally, there are three `FF`'s. The first is to exit `01 01`
 and drops us back to `01`. The second drops out of that as well. The third
 signifies the end of the answer.
 
 For data, it works slightly different. When you step into the data part of an operation,
-you do so with the sequence of `DF EF` instead of just `EF`. The next thing in the message
+you do so with the sequence of `FD FE` instead of just `FE`. The next thing in the message
 is the length of the data this call takes. This is usually a single byte, but see 
 [Lengths](basics.md#lengths) for a full specification of how this works. All of this is 
 done with the question of forwards compatibility in mind; this way, the client does not 
@@ -173,9 +173,9 @@ This way a range of valid values is defined. If multiple ranges are valid, you c
 immediately enter the range *again* to define the next range.
 
 Before I show that in another example, there's one more trick I want to introduce.
-Normally, you would use `EF` to enter the thing you just defined. This can be a 
+Normally, you would use `FE` to enter the thing you just defined. This can be a 
 single or a range. However, you can also use it to mean "everything". This is done
-by using `EF` to step in without having defined what to step into.
+by using `FE` to step in without having defined what to step into.
 
 Alright, let's put it into practice. Here, we have a board with pins 0-5 and 10-15
 that supports `01 02 01`(PWM which has one byte of data) on pin 1-3 but only values
@@ -185,40 +185,40 @@ on frequency 100-200 on all pins and with values 50-100 on frequency 50 also on 
 pins.
 
     00
-        EF
+        FE
         01
-            EF
+            FE
             FF
         05
         FF
     01
-        EF
+        FE
         02
-            EF
+            FE
             01
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 03
-                    DF EF
+                    FD FE
                     01
                     80 FF
                 05
-                    EF FF
+                    FE FF
                 0F
-                    DF EF
+                    FD FE
                     01
                     80 FF
                 FF
             
             02
-                EF
-                    DF EF
+                FE
+                    FD FE
                     02
                     00 FF
                     64 C8
                     
-                    DF EF
+                    FD FE
                     02 
                     32 64
                     32 32
@@ -229,7 +229,7 @@ pins.
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01 01`. There, we define pin range 1-3
-and jump into the data part with `DF EF`. Next is `01` which is the number of bytes of 
+and jump into the data part with `FD FE`. Next is `01` which is the number of bytes of 
 data this operation takes. Then we have `80` (hexadecimal for 128) as the minimum and 
 `FF` (hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with 
 dropping out of the data part, as that happens automatically. It's just the maximum value
@@ -252,8 +252,8 @@ drop out of everything we're still in, and then close off the response with `FF`
 There may be different parts of the protocol which have similar hardware requirements
 and take the same arguments. In such cases, they will be listed as part of the protocol 
 as "identical". Instead of stepping into such a part of the protocol, you can instead 
-use `DF` to declare that any of its content is the same last element this was related to.
-The `DF` is then followed by the part of the protocol for which you are using the fact
+use `FD` to declare that any of its content is the same last element this was related to.
+The `FD` is then followed by the part of the protocol for which you are using the fact
 they are identical, which is then closed off with a `FF`.
 
 An example of where such a relationship may be defined is modes `01` and `02`. The one
@@ -287,33 +287,33 @@ has been defined.
 Let's show this in some examples.
 
     00
-        EF
+        FE
         01
-            EF
+            FE
             FF
         05
         FF
     01
-        EF
+        FE
         02
-            EF
+            FE
             02
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 05
-                    DF EF
+                    FD FE
                     02
                     00 FF
                     80 FF
                 0A
-                    EF FF
+                    FE FF
                 0F
-                    DF 01 02 02 01 FF
+                    FD 01 02 02 01 FF
                 FF
         FF
     03
-        DF 02 FF
+        FD 02 FF
     FF
 
 The above example starts off with defining the mandatory operations. Then, it declares that it can
@@ -324,33 +324,33 @@ and `0F` in hexadecimal respectively). Finally, it uses the copying mechanic aga
 right now.
 
     00
-        EF
+        FE
         01
-            EF
+            FE
             FF
         05
         FF
     01
-        EF
+        FE
         02
-            EF
+            FE
             01
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 03
                 FF
             02
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 05
                 FF
             FF
     03
-        EF
+        FE
         02
-            DF 01 02 01 FF
+            FD 01 02 01 FF
         FF
     FF
 
@@ -365,8 +365,8 @@ When the hardware requirements are similar, but the call takes different argumen
 declared as similar. This has the same goal as things being marked as identical, but it works
 slightly differently.
 
-Just like for identical parts, it is started by `DF`, followed by the part it is similar to.
-However, the next thing is `EF`. That is followed by a data definition, just like when providing
+Just like for identical parts, it is started by `FD`, followed by the part it is similar to.
+However, the next thing is `FE`. That is followed by a data definition, just like when providing
 a normal definition of what data is allowed. So, it starts off with the [length](basics.md#lengths)
 of the data, followed by that many pairs of minimum and maximum values for each of those bytes.
 The protocol will define how the similar base is combined with new data, as well as how many bytes
@@ -379,25 +379,25 @@ from `01 02` and uses them as the allowed values for both "from-value" and "to-v
 the new time value to get all defined data values.
 
     00
-        EF
+        FE
         01
-            EF
+            FE
             FF
         05
         FF
     01
-        EF
+        FE
         02
-            EF
+            FE
             01
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 03
                 FF
             FF
         03
-            DF 01 01 EF
+            FD 01 01 FE
             01
             01 0A
     FF
@@ -405,33 +405,33 @@ the new time value to get all defined data values.
 Here, we define the standard operations and PWM with any value on pins 1 through 3. Then, it uses the
 similarity to define fading from any value to any value with time within 1 and 10.
 
-Instead of the `DF .. EF` sequence, the `DF .. DF FF` can be used. In this case, you aren't stepping
+Instead of the `FD .. FE` sequence, the `FD .. FD FF` can be used. In this case, you aren't stepping
 into the data part. This means that all possible values are allowed for the values that would be defined
 for on top of the similarity.
 
     00
-        EF
+        FE
         01
-            EF
+            FE
             FF
         05
         FF
     01
-        EF
+        FE
         02
-            EF
+            FE
             01
-                EF
+                FE
                 01
-                    EF FF
+                    FE FF
                 03
-                    DF EF
+                    FD FE
                     01
                     00 80
                 FF
             FF
         03
-            DF 01 01 DF FF
+            FD 01 01 FD FF
     FF
 
 Here, we define the standard operations and PWM with values up to 128 on pins 1 through 3. 
@@ -450,40 +450,40 @@ If possible, it should point to the original operation, not to something that is
 identical to it, even if the original one is simply defined as a copy of the identical
 property. 
 
-If this is not possible, you can use a different syntax instead. This starts with a `DF` as
+If this is not possible, you can use a different syntax instead. This starts with a `FD` as
 always, but is then followed by the operation or partial operation that the current one
 is similar to. This is always the (partial) operation on which the similarity is defined,
-even if you are at a deeper level. That is then followed by another `DF` and the
+even if you are at a deeper level. That is then followed by another `FD` and the
 (partial) operation it is identical to (on which being identical is defined), a third
-`DF` and finally the part you want to copy. If these last two parts are the same, one of
-the two may be left out together with a `DF`. This is all closed by either `EF` or `DF FF`
+`FD` and finally the part you want to copy. If these last two parts are the same, one of
+the two may be left out together with a `FD`. This is all closed by either `FE` or `FD FF`
 same as above.
 
 In summary, all of the following are possible:
 
     # This is similar to 01 01 with the following additional data
-    DF 01 01 EF
+    FD 01 01 FE
     
     # This is similar to 01 01 with any additional data
-    DF 01 01 DF FF
+    FD 01 01 FD FF
     
     # 01 01 is identical 02 02 and this is similar to 02 02 with the following additional data
-    DF 01 01 
-    DF 02 02 EF
+    FD 01 01 
+    FD 02 02 FE
     
     # 01 01 is identical 02 02 and this is similar to 02 02 with any additional data
-    DF 01 01 
-    DF 02 02 DF FF
+    FD 01 01 
+    FD 02 02 FD FF
     
     # 01 01 is identical 02 02 and this is similar to 02 02 01 with the following additional data
-    DF 01 01 
-    DF 02 02 
-    DF 02 02 01 EF
+    FD 01 01 
+    FD 02 02 
+    FD 02 02 01 FE
     
     # 01 01 is identical 02 02 and this is similar to 02 02 01 with any additional data
-    DF 01 01
-    DF 02 02
-    DF 02 02 01 DF FF
+    FD 01 01
+    FD 02 02
+    FD 02 02 01 FD FF
 
 For the later options, it's worth checking if using this actually saves data over just repeating
 the definition. If it doesn't, using it won't give you the [the canonical response](the-canonical-response)
@@ -496,10 +496,10 @@ give the canonical response. These rules are:
 
 - Always pick the response that takes the lowest number of bytes
 
-- In case you can use `DF .. FF` to declare a part as identical, do so only if this
+- In case you can use `FD .. FF` to declare a part as identical, do so only if this
   decreases the length of the response (not if it is the same).
 
-- In case a part of the response uses `DF .. FF` to declare it as the same as another
+- In case a part of the response uses `FD .. FF` to declare it as the same as another
   part, make sure the (lexicographically) lower part is defined normally, while the
   higher part is declared identical.
 

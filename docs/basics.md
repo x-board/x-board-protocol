@@ -18,7 +18,7 @@ The first variant is for when the client doesn't expect an answer. The second is
 the case where the client does expect an answer. The first read retrieves the length of
 the response, the second read retrieves the response itself and will be as long
 as the value read earlier. The length is typically one byte, but when the length is
-higher than 252 (`DF`, `EF`, and `FF` aren't valid values) it uses multiple bytes.
+higher than 252 (`FD`, `FE`, and `FF` aren't valid values) it uses multiple bytes.
 See [Lengths](#lengths) for how this works exactly.
 
 When a message doesn't have a response and the client does ask for one, the
@@ -52,7 +52,7 @@ a pin number is present is defined by the combination of mode and operation
 (though currently you can tell just by looking at the mode). The amount of data
 that goes with an operation is also defined by the combination of mode and operation.
 
-The bytes `DF`, `EF` and `FF` are not valid for use in the mode, the operation or the pin.
+The bytes `FD`, `FE` and `FF` are not valid for use in the mode, the operation or the pin.
 They are valid for use in data bytes.
 
 A way of supporting variable amounts of data is still being looked at.
@@ -63,8 +63,8 @@ Lengths
 In several places in the protocol either the host or the client sends the length of a message
 or part of a message. This is always done in the same way.
 
-Initially, only the first byte is examined. If that byte isn't `DF`, `EF` or `FF`, the value is
-taken as the length. `DF` and `EF` are reserved values and simply shouldn't occur here. If this
+Initially, only the first byte is examined. If that byte isn't `FD`, `FE` or `FF`, the value is
+taken as the length. `FD` and `FE` are reserved values and simply shouldn't occur here. If this
 byte is `FF`, the next byte is read and it's taken as the number of bytes that will be used to
 define the length. Then, that number of bytes are read and these bytes are combined Big-Endian
 and their combined value is used as the length.
