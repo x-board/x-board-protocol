@@ -120,7 +120,8 @@ lists the parts of that mode it supports. It supports `01` (ping), `02` (list pi
 says it's done with mode `00` by sending a `FF`. Finally, it says it's done by sending
 another `FF`.
 
-You can also more `EF`'s to go into deeper levels. On top of that, you can use
+You can also more `EF`'s to go into deeper levels. Even if an operation is multiple
+bytes, you will always use `EF` to step into a single byte. On top of that, you can use
 `EF FF` to use a range instead of just a single value. Let's look at a device that
 supports the mandatory calls, `00 07` (set I2C address) `00 08` (set I2C address
 temporarily) and `00 08` (reset I2C address). It also supports digital set
@@ -241,39 +242,42 @@ block automatically and enter it again immediately to define another range. This
 we define a single value for the frequency by giving it the range of 32-32. Then, we
 drop out of everything we're still in, and then close off the response with `FF`.
 
-### Rules about skipping and jumping ###
+### Identical parts of the protocol ###
 
-Before we can wrap this up, there are some rules that should be mentioned.
+There may be different parts of the protocol which have similar hardware requirements.
+In such cases, they will be listed as part of the protocol as "identical". Instead of
+stepping into such a part of the protocol, you can instead use `DF` to declare that
+any of its content is the same last element this was related to. The `DF` is then
+followed by the part of the protocol for which are using the fact they are identical,
+which is then closed off with a `FF`.
 
-If there are multiple modes that have the same operations, (e.g. `02` SET and
-`03` SET DEFAULT) you can skip any of them beyond the first by `EF`-stepping into
-them. This means that for that mode, you support exactly the same for this mode 
-as for the last mode with the same possibilities. This can greatly reduce the
-size of your response. You're not allowed to not do `EF` on a mode in any other
-situation, and you may not use double `EF` (to define things for all operations
-in a mode) on a mode in any situation. This is because later versions of the
-protocol may always support more operations for that mode. On top of that, stepping
-into everything of a mode just doesn't make much sense.
+An example of where such a relationship may be defined is modes `01` and `02`. The one
+sets the value of a pin and the other sets a default for that pin when the board is
+powered up. If the hardware support is there for saving a default state for a pin,
+it is likely the two modes will have the same contents. It's also pretty obvious how
+this works, so in the protocol definition, mode `03` won't be defined separately, but
+just have a reference to being identical to `02`.
 
-(I am aware that the above piece isn't very clear. I don't even know what it says,
-despite the fact that I was the one who wrote it. I plan to redesign and then
-rewrite this functionality. The functionality should still be present and I actually
-also want it to apply to (partial) operations.)
+When something is defined as being identical to another part of the protocol, you
+can use this technique both ways. In the definition, you can either define the original
+and declare the "identical" one to have the same definition, or you can define the
+identical one and state that the original has the same definition. You might even not
+have the original and declare one thing that's identical to it to have the same
+definition as another thing that also has the same definition. However, see
+[The canonical response](#the-canonical-response) for which of the items should be
+defined and which should be declared as the same.
 
-For a partial operation, you may both skip jumping in to state you support all its 
-child operations and jump into all if all children have the same amount of remaining
-operations and the same number of bytes of data. For both, though, you may only do
-this if the partial state is officially stable. Such a stabilization is a promise
-that the partial state won't get any new children. It is separate from all its
-children being stabilized (because even then it could get another child) but can
-of course only happen if all children are stable.
+Being identical is transitive. This means that if a mode is identical to another mode,
+all operations and partial operations in that mode are also identical to the respective
+operations and partial operation in the other mode. 
 
-For a complete command, you can always skip the data (no `EF`) to allow anything the
-protocol allows, but never jump in for everything (double `EF`) because the
-data is always the last step. Commands that don't take data should of course
-never be stepped into. For a command that does have a complete operation and still
-need a pins you can either skip (no `EF`: "any data on any pin") or jump in for
-everything (double `EF`: "this data on any pin").
+You can also use this technique on a pin or pin range. This makes sense if the original
+is defined for multiple pins or pin ranges and you only want to copy the values for one
+of these pins or ranges. It can also be used for pin ranges within a single operation if
+both ranges share the same data. For a pin range, define it as identical to the first pin
+of the range. In case multiple ranges start at the same pin, this shouldn't be used.
+You can't use this after part of the data has been defined, nor when the entire data part 
+has been defined.
 
 ### The canonical response ###
 
@@ -283,17 +287,24 @@ give the canonical response. These rules are:
 
 - Always pick the response that takes the lowest number of bytes
 
+- In case you can use `DF .. FF` to declare a part as identical, do so only if this
+  decreases the length of the response (not if it is the same).
+
+- In case a part of the response uses `DF .. FF` to declare it as the same as another
+  part, make sure the (lexicographically) lower part is defined normally, while the
+  higher part is declared identical.
+
 - If the number of bytes is the same, use the one that has the lower values
   (this translate into "prefer enumerations over ranges in such cases")
 
 - If parts of the content can change places (without increasing the total size). Sort
-  them by their values. When two ranges start at the same value, use do the shorter
+  them by their values. When two ranges start at the same value, do use the shorter
   range first. Otherwise, just sort them lexicographically (i.e. first byte vs first
   byte, move to next byte in case of a tie, no more bytes is lower than any byte value)
 
 A client should actually support any non-canonical responses as well. This is because
 it can be easy to accidentally provide a non-canonical response. Moreover, the canonical
 answer can sometimes even change based on outside factors (when finalizing a partial
-operation without giving it more children makes a shortcut possible). On top of that,
-this also reduces the chance of missing a corner case that resulted in a shorter
+operation without giving it more children making a shortcut possible). On top of that,
+this also mitigates the risk of missing a corner case that resulted in a shorter
 response.
