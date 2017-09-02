@@ -279,6 +279,78 @@ of the range. In case multiple ranges start at the same pin, this shouldn't be u
 You can't use this after part of the data has been defined, nor when the entire data part 
 has been defined.
 
+Let's show this in some examples.
+
+    00
+        EF
+        01
+            EF
+            FF
+        05
+        FF
+    02
+        EF
+        03
+            EF
+            01
+                EF FF
+            05
+                DF EF
+                02
+                00 FF
+                80 FF
+            0A
+                EF FF
+            0F
+                DF 02 03 01 FF
+            FF
+        FF
+    03
+        DF 02 FF
+    FF
+
+The above example starts off with defining the mandatory operations. Then, it declares that it can
+use SoftPWM on pins 1 to 5, but only with frequencies above 128 (`80` in hexadecimal). Next, it
+uses the copying mechanic to state that it supports SoftPWM in the same way on pins 10-15 (`0A`
+and `0F` in hexadecimal respectively). Finally, it uses the copying mechanic again on the mode
+`03` to state it supports setting a default in exactly the same way as it supports setting pins
+right now.
+
+
+    00
+        EF
+        01
+            EF
+            FF
+        05
+        FF
+    02
+        EF
+        02
+            EF
+            01
+                EF FF
+            03
+            FF
+        03
+            EF
+            01
+                EF FF
+            05
+            FF
+        FF
+    03
+        EF
+        02
+            DF 02 02 FF
+        FF
+    FF
+
+This example defines the mandatory operations, as well as PWM on pins 1 through 3 (with any data)
+as well as SoftPWM on pins 1 through 5 (with any data as well). For the set default, it uses the
+copying mechanic to state that it supports PWM in the same way, without stating it supports other
+things (here: SoftPWM) for set default.
+
 ### The canonical response ###
 
 There are usually multiple ways to write a response for the same set of functionality.
