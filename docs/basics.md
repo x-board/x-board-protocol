@@ -12,14 +12,14 @@ first part outlines how this is done.
 An I2C Master calls the board in one of the following ways:
 
     START Write (message) STOP
-    START Write (message) START Read 1 byte START Read x bytes STOP
+    START Write (message) START Read length START Read length bytes STOP
 
 The first variant is for when the client doesn't expect an answer. The second is for
 the case where the client does expect an answer. The first read retrieves the length of
 the response, the second read retrieves the response itself and will be as long
-as the value read earlier. There may be a way to designate a length that is higher
-than 255 in a process that takes multiple reads. However, that hasn't been defined
-yet, but we can state that for the moment `EF`, `DF` and`FF` aren't a valid length.
+as the value read earlier. The length is typically one byte, but when the length is
+higher than 252 (`DF`, `EF`, and `FF` aren't valid values) it uses multiple bytes.
+See [Lengths](#lengths) for how this works exactly.
 
 When a message doesn't have a response and the client does ask for one, the
 board should simply respond with a length of zero. It's also valid for the client not
@@ -56,6 +56,30 @@ The bytes `DF`, `EF` and `FF` are not valid for use in the mode, the operation o
 They are valid for use in data bytes.
 
 A way of supporting variable amounts of data is still being looked at.
+
+Lengths
+-------
+
+In several places in the protocol either the host or the client sends the length of a message
+or part of a message. This is always done in the same way.
+
+Initially, only the first byte is examined. If that byte isn't `DF`, `EF` or `FF`, the value is
+taken as the length. `DF` and `EF` are reserved values and simply shouldn't occur here. If this
+byte is `FF`, the next byte is read and it's taken as the number of bytes that will be used to
+define the length. Then, that number of bytes are read and these bytes are combined Big-Endian
+and their combined value is used as the length.
+
+For partial lengths, this happens while processing a message, so there's nothing special about
+how this happens. However, for full message lengths sent by the client board, this happens in
+the middle of a number of I2C messages. In that case, the request will look like either of these
+two forms:
+
+    START Read byte
+    START Read byte START Read byte (=n) START Read n bytes
+
+Of course, the first form is what happens if the value isn't FF, while the second is what happens
+if it is FF.
+
 
 Modes: 00
 ---------
