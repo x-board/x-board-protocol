@@ -162,7 +162,8 @@ signifies the end of the answer.
 
 For data, it works slightly different. When you step into the data part of an operation,
 you do so with the sequence of `DF EF` instead of just `EF`. The next thing in the message
-is a single byte containing the number of bytes of data this call takes. All of this is 
+is the length of the data this call takes. This is usually a single byte, but see 
+[Lengths](basics.md#lengths) for a full specification of how this works. All of this is 
 done with the question of forwards compatibility in mind; this way, the client does not 
 have to know about details of the protocol that may be added after the client was created. 
 Next, there are twice that many bytes. These are pairs of bytes, each representing a byte of
