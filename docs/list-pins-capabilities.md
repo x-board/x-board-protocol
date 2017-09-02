@@ -253,7 +253,7 @@ There may be different parts of the protocol which have similar hardware require
 In such cases, they will be listed as part of the protocol as "identical". Instead of
 stepping into such a part of the protocol, you can instead use `DF` to declare that
 any of its content is the same last element this was related to. The `DF` is then
-followed by the part of the protocol for which are using the fact they are identical,
+followed by the part of the protocol for which you are using the fact they are identical,
 which is then closed off with a `FF`.
 
 An example of where such a relationship may be defined is modes `01` and `02`. The one
