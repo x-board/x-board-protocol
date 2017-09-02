@@ -6,13 +6,13 @@ The modes beyond 00 contain pin operations, which are done on a single pin.
 
 Mode 01 is "SET" and sets pins to a certain state. This is planned to be something like this:
 
-    01 00 <pin> <value>: digital; set pin to high (value == 01) or low (value == 00)
-    01 01 <type> <pin> <value>: analog
+    01 01 <pin> <value>: digital; set pin to high (value == 01) or low (value == 00)
+    01 02 <type> <pin> <value>: analog
         Type 01: PWM
         Type 02: SoftPWM (set frequency?)
-    01 02 <type> <pin> <value> <time>: Fade to value in time (min / max is digital at end?)
+    01 03 <type> <pin> <value> <time>: Fade to value in time (min / max is digital at end?)
         Type: same as for 01 01
-    01 05 <pin> <blink-type> [<fade-type>] <on-time> <off-time> [<action-time>]: blink with time as frequency and type as blink type
+    01 04 <pin> <blink-type> [<fade-type>] <on-time> <off-time> [<action-time>]: blink with time as frequency and type as blink type
         Blink type 00: on/off (no action time) 
         Blink type 01: fade (action time is length of fade)
             Fade type: same as for 01 01

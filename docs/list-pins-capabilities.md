@@ -177,9 +177,9 @@ single or a range. However, you can also use it to mean "everything". This is do
 by using `EF` to step in without having defined what to step into.
 
 Alright, let's put it into practice. Here, we have a board with pins 0-5 and 10-15
-that supports `01 02`(PWM which has one byte of data) on pin 1-3 but only values
+that supports `01 02 01`(PWM which has one byte of data) on pin 1-3 but only values
 of 128 or higher and supports PWM fully on ports 5 and 10-15. It also supports
-`01 03` (SoftPWM which has two bytes of data, a value and a frequency) with any value
+`01 02 02` (SoftPWM which has two bytes of data, a value and a frequency) with any value
 on frequency 100-200 on all pins and with values 50-100 on frequency 50 also on all
 pins.
 
@@ -195,44 +195,48 @@ pins.
         02
             EF
             01
-                EF FF
-            03
-                DF EF
+                EF
                 01
-                80 FF
-            05
-                EF FF
-            0F
-                DF EF
-                01
-                80 FF
-            FF
-        03
-            EF
-                DF EF
-                02
-                00 FF
-                64 C8
-                
-                DF EF
-                02 
-                32 64
-                32 32
+                    EF FF
+                03
+                    DF EF
+                    01
+                    80 FF
+                05
+                    EF FF
+                0F
+                    DF EF
+                    01
+                    80 FF
+                FF
+            
+            02
+                EF
+                    DF EF
+                    02
+                    00 FF
+                    64 C8
+                    
+                    DF EF
+                    02 
+                    32 64
+                    32 32
+                FF
             FF
         FF
     FF
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
-mode `01` and immediately continue to operation `01`. There, we define pin range 1-3
+mode `01` and immediately continue to operation `01 01`. There, we define pin range 1-3
 and jump into the data part with `DF EF`. Next is `01` which is the number of bytes of 
 data this operation takes. Then we have `80` (hexadecimal for 128) as the minimum and 
 `FF` (hexadecimal for 255) as the maximum. Do note that this `FF` has nothing to do with 
 dropping out of the data part, as that happens automatically. It's just the maximum value
 of the range. Then, we define the same range of values for pins 5-15. We can create a
-range over pins 6-9 because they don't exist. Finally, we drop out of `01 02` and back 
-into `01`.
+range over pins 6-9 because they don't exist. Finally, we drop out of `01 02 01` and back 
+into `01 02`.
 
-Next, we enter `01 03`. Immediately, we enter again, which means we enter "all pins".
+Next, we enter `01 02 02`. Immediately, we enter again, which means we enter "all pins".
 For all pins, we start with `02` which is the number of bytes of data for the 
 operation we define give `00` as the minimum value for value and `64` (hexadecimal
 for 100) as the minimum value for frequency. Next, we define `FF` as the maximum for
@@ -288,22 +292,24 @@ Let's show this in some examples.
             FF
         05
         FF
-    02
+    01
         EF
-        03
+        02
             EF
-            01
-                EF FF
-            05
-                DF EF
-                02
-                00 FF
-                80 FF
-            0A
-                EF FF
-            0F
-                DF 02 03 01 FF
-            FF
+            02
+                EF
+                01
+                    EF FF
+                05
+                    DF EF
+                    02
+                    00 FF
+                    80 FF
+                0A
+                    EF FF
+                0F
+                    DF 01 02 02 01 FF
+                FF
         FF
     03
         DF 02 FF
@@ -324,25 +330,27 @@ right now.
             FF
         05
         FF
-    02
+    01
         EF
         02
             EF
             01
-                EF FF
-            03
+                EF
+                01
+                    EF FF
+                03
+                FF
+            02
+                EF
+                01
+                    EF FF
+                05
+                FF
             FF
-        03
-            EF
-            01
-                EF FF
-            05
-            FF
-        FF
     03
         EF
         02
-            DF 02 02 FF
+            DF 01 02 01 FF
         FF
     FF
 
