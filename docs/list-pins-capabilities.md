@@ -43,9 +43,17 @@ other things.
 List Pins
 ---------
 
-The list pins call is pretty simple. The client makes this call:
+The list pins call will have different lengths for different boards. That's why a client
+should first request the length of the list pins call. This is done through a simple call:
 
     00 02
+
+The board should respond with a single byte containing the number of bytes that the answer
+this board gives to the list pins call (`00 03`).
+
+The list pins call  itself is also pretty simple. The client makes this call:
+
+    00 03
 
 The board responds with ranges of pin numbers it has. It sends pairs of bytes, where
 each first byte of a pair designates the beginning of a range and the second byte
@@ -76,18 +84,29 @@ List Capabilities
 they are stabilized, so they shouldn't be taken to actually mean that. Check
 the pin operation reference instead.)
 
-### The call ###
+### The calls ###
 
-The other call is to list the capabilities of a board. This call is a bit harder
-just because there is so much more information in it.
+Like with the list pins call, the length of the list pins will be different between
+different boards and board versions. That's why there's once again a separate call
+to get the length of the response for this board. This is done through the following
+call:
 
-The client's call is once again pretty simple:
+    00 04
+
+The client will respond with two bytes which combined in big-endian fashion represent
+the length of the list capabilities call. It's not truly expected that many boards will
+have responses longer than 255 bytes, but it sounds like it might be a possibility, so
+protocol provides for it.
+
+Nest, there is the call to list the capabilities of a board. The response to this board
+is more complicated because it is pretty dense in information, but the call itself is
+rather simple:
 
     00 03
 
 ### The response ###
 
-However, the response is more involved. It will basically just list capabilities
+As mentioned, the response is more involved. It will basically just list capabilities
 of the board, using `FD`, `FE` and `FF` as operators. The mode, operation and pin parts
 of a call are treated mostly the same in this response, so I will refer all three
 together as the *command*. The data part of a call is treated rather differently.
