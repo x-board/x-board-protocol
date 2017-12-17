@@ -11,18 +11,20 @@ listed below.
 This operation can be used to check if the board is still alive or to see if the I2C address
 is used by an x-board board.
 
-    00 02: List pins
+    00 02: List pins length
+    00 03: List pins
 
-This operation requests for the board to identify which pins are available. This only includes
-available pins, so not ones that are - for example - in use by I2C. The response to this call
+These two operations request for the board to identify which pins are available. This only includes
+available pins, so not ones that are - for example - in use by I2C. The response to these calls
 is specified on the [list pins and capabilities page](list-pins-capabilities.md).
 
-    00 03: List capabilities
+    00 04: List capabilities length
+    00 05: List capabilities
     
-This operation is the crux of having a protocol based on optional functionality. By calling
-this function, the device can ask the board what it supports. The board must respond with a 
+These operations are the crux of having a protocol based on optional functionality. By calling
+these functions, the client can ask the board what it supports. The board must respond with a 
 listing of what functionality it supports on which pins. There is an extensive specification
-of the response to this call on the [list pins and capabilities page](list-pins-capabilities.md).
+of the response to these calls on the [list pins and capabilities page](list-pins-capabilities.md).
 
     00 04: Board identifier
     
