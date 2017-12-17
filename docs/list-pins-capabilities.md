@@ -134,25 +134,26 @@ Or, here's the same thing formatted a little differently:
     FF
     
 It starts with claiming mode `00`. Then it jumps into that mode using `FE` and
-lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins),
-`03` (list capabilities) and `04` (board identifier). Then, it 
+lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins length),
+`03` (list pins) and `04` (list capabilities length). Then, it 
 says it's done with mode `00` by sending a `FF`. Finally, it says it's done by sending
 another `FF`.
 
-You can also more `FE`'s to go into deeper levels. Even if an operation is multiple
+You can also use more `FE`'s to go into deeper levels. Even if an operation is multiple
 bytes, you will always use `FE` to step into a single byte. On top of that, you can use
 `FE FF` to use a range instead of just a single value. Let's look at a device that
-supports the mandatory calls, `00 07` (set I2C address) `00 08` (set I2C address
-temporarily) and `00 08` (reset I2C address). It also supports digital set
+supports the mandatory calls, `00 09` (set I2C address) `00 0A` (set I2C address
+temporarily) and `00 0B` (reset I2C address). It also supports digital set
 (`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
 
     00
         FE
         01
             FE FF
-        05
         07
-        08
+        09
+        0A
+        0B
         FF
     01
         FE
@@ -170,7 +171,7 @@ temporarily) and `00 08` (reset I2C address). It also supports digital set
     FF
 
 In this example, we start by defining what we can do in mode `00`. There we can
-do the range from `01` to `05`, `07` and `08`. The `FF` signifies that we're done
+do the range from `01` to `07`, `09`, `0A` and `0B`. The `FF` signifies that we're done
 with mode `00`.
 
 Next up is mode `01`, here we look at operation `01` and enter it using `FE`. We
@@ -198,7 +199,7 @@ by using `FE` to step in without having defined what to step into.
 
 Alright, let's put it into practice. Here, we have a board with pins 0-5 and 10-15
 that supports `01 02 01`(PWM which has one byte of data) on pin 1-3 but only values
-of 128 or higher and supports PWM fully on ports 5 and 10-15. It also supports
+of 128 or higher and supports PWM fully on pins 5 and 10-15. It also supports
 `01 02 02` (SoftPWM which has two bytes of data, a value and a frequency) with any value
 on frequency 100-200 on all pins and with values 50-100 on frequency 50 also on all
 pins.
@@ -208,7 +209,7 @@ pins.
         01
             FE
             FF
-        05
+        07
         FF
     01
         FE
@@ -310,7 +311,7 @@ Let's show this in some examples.
         01
             FE
             FF
-        05
+        07
         FF
     01
         FE
@@ -347,7 +348,7 @@ right now.
         01
             FE
             FF
-        05
+        07
         FF
     01
         FE
@@ -402,7 +403,7 @@ the new time value to get all defined data values.
         01
             FE
             FF
-        05
+        07
         FF
     01
         FE
@@ -433,7 +434,7 @@ for on top of the similarity.
         01
             FE
             FF
-        05
+        07
         FF
     01
         FE
