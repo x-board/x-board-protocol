@@ -12,19 +12,17 @@ first part outlines how this is done.
 An I2C Master calls the board in one of the following ways:
 
     START Write (message) STOP
-    START Write (message) START Read length START Read length bytes STOP
+    START Write (message) START Read length bytes STOP
 
 The first variant is for when the client doesn't expect an answer. The second is for
-the case where the client does expect an answer. The first read retrieves the length of
-the response, the second read retrieves the response itself and will be as long
-as the value read earlier. The length is typically one byte, but when the length is
-higher than 252 (`FD`, `FE`, and `FF` aren't valid values) it uses multiple bytes.
-See [Lengths](#lengths) for how this works exactly.
-
-When a message doesn't have a response and the client does ask for one, the
-board should simply respond with a length of zero. It's also valid for the client not
-to request a response even though the call should generate one. This is all meant to
-provide good backwards and forwards compatibility.
+the case where the client does expect an answer. The client is supposed to know the
+length of the response for any call it does. For most calls that have a response,
+this is defined as part of the protocol. There are two cases in which the length isn't
+defined as part of the protocol because it can differ. These are the list pins
+(`00 03`) and the list capabilities (`00 05`) calls. Both of these calls have a matching
+call that will return the length of the response for this board (`00 02` and `00 04`
+respectively) and the client is supposed to use these to find out the length of the
+response before doing the calls themselves.
 
 The protocol is defined in terms of the happy flow only. When the client software does
 not follow the protocol (e.g. does a read without a preceding write), it doesn't 
@@ -60,25 +58,13 @@ A way of supporting variable amounts of data is still being looked at.
 Lengths
 -------
 
-In several places in the protocol either the host or the client sends the length of a message
-or part of a message. This is always done in the same way.
+(Note: I'm planning to get rid of this part of the protocol all together.)
 
 Initially, only the first byte is examined. If that byte isn't `FD`, `FE` or `FF`, the value is
 taken as the length. `FD` and `FE` are reserved values and simply shouldn't occur here. If this
 byte is `FF`, the next byte is read and it's taken as the number of bytes that will be used to
 define the length. Then, that number of bytes are read and these bytes are combined Big-Endian
 and their combined value is used as the length.
-
-For partial lengths, this happens while processing a message, so there's nothing special about
-how this happens. However, for full message lengths sent by the client board, this happens in
-the middle of a number of I2C messages. In that case, the request will look like either of these
-two forms:
-
-    START Read byte
-    START Read byte START Read byte (=n) START Read n bytes
-
-Of course, the first form is what happens if the value isn't FF, while the second is what happens
-if it is FF.
 
 
 Modes: 00
