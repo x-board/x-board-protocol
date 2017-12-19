@@ -104,7 +104,7 @@ the length of the list capabilities call. It's not truly expected that many boar
 have responses longer than 255 bytes, but it sounds like it might be a possibility, so
 protocol provides for it.
 
-Nest, there is the call to list the capabilities of a board. The response to this board
+Next, there is the call to list the capabilities of a board. The response to this board
 is more complicated because it is pretty dense in information, but the call itself is
 rather simple:
 
