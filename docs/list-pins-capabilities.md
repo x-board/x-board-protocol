@@ -130,13 +130,12 @@ only `00 01`, `00 02`, `00 03` and `00 04`. (This is less than the mandatory cal
 
 Or, here's the same thing formatted a little differently:
 
-    00 
-        FE
+    00 FE
         01
         02
         03
         04
-        FF
+    FF
     
 It starts with claiming mode `00`. Then it jumps into that mode using `FE` and
 lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins length),
@@ -150,19 +149,16 @@ supports the mandatory calls, `00 09` (set I2C address) `00 0A` (set I2C address
 temporarily) and `00 0B` (reset I2C address). It also supports digital set
 (`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
 
-    00
-        FE
+    00 FE
         01
             FE FF
         07
         09
         0A
         0B
-        FF
-    01
-        FE
-        01
-            FE
+    FF
+    01 FE
+        01 FE
             01
                 FE FF
             05
@@ -170,8 +166,8 @@ temporarily) and `00 0B` (reset I2C address). It also supports digital set
             0A
                 FE FF
             14
-            FF
         FF
+    FF
 
 In this example, we start by defining what we can do in mode `00`. There we can
 do the range from `01` to `07`, `09`, `0A` and `0B`. The `FF` signifies that we're done
@@ -206,19 +202,14 @@ of 128 or higher and supports PWM fully on pins 5 and 10-15. It also supports
 on frequency 100-200 on all pins and with values 50-100 on frequency 50 also on all
 pins.
 
-    00
-        FE
+    00 FE
         01
-            FE
-            FF
+            FE FF
         07
-        FF
-    01
-        FE
-        02
-            FE
-            01
-                FE
+    FF
+    01 FE
+        02 FE
+            01 FE
                 01
                     FE FF
                 03
@@ -231,10 +222,9 @@ pins.
                     FD FE
                     01
                     80 FF
-                FF
+            FF
             
-            02
-                FE
+            02 FE
                     FD FE
                     02
                     00 FF
@@ -244,9 +234,9 @@ pins.
                     02 
                     32 64
                     32 32
-                FF
             FF
         FF
+    FF
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01 01`. There, we define pin range 1-3
@@ -307,19 +297,15 @@ has been defined.
 
 Let's show this in some examples.
 
-    00
-        FE
+    00 FE
         01
             FE
             FF
         07
-        FF
-    01
-        FE
-        02
-            FE
-            02
-                FE
+    FF
+    01 FE
+        02 FE
+            02 FE
                 01
                     FE FF
                 05
@@ -331,8 +317,9 @@ Let's show this in some examples.
                     FE FF
                 0F
                     FD 01 02 02 01 FF
-                FF
+            FF
         FF
+    FF
     03
         FD 02 FF
 
@@ -343,32 +330,26 @@ and `0F` in hexadecimal respectively). Finally, it uses the copying mechanic aga
 `03` to state it supports setting a default in exactly the same way as it supports setting pins
 right now.
 
-    00
-        FE
+    00 FE
         01
-            FE
-            FF
+            FE FF
         07
-        FF
-    01
-        FE
-        02
-            FE
-            01
-                FE
+    FF
+    01 FE
+        02 FE
+            01 FE
                 01
                     FE FF
                 03
-                FF
-            02
-                FE
+            FF
+            02 FE
                 01
                     FE FF
                 05
-                FF
             FF
-    03
-        FE
+        FF
+    FF
+    03 FE
         02
             FD 01 02 01 FF
         FF
@@ -397,28 +378,24 @@ of data when combining: time. In the combination process, it uses the allowed va
 from `01 02` and uses them as the allowed values for both "from-value" and "to-value". It then adds
 the new time value to get all defined data values.
 
-    00
-        FE
+    00 FE
         01
-            FE
-            FF
+            FE FF
         07
-        FF
-    01
-        FE
-        02
-            FE
-            01
-                FE
+    FF
+    01 FE
+        02 FE
+            01 FE
                 01
                     FE FF
                 03
-                FF
             FF
+        FF
         03
             FD 01 01 FE
             01
             01 0A
+    FF
 
 Here, we define the standard operations and PWM with any value on pins 1 through 3. Then, it uses the
 similarity to define fading from any value to any value with time within 1 and 10.
@@ -427,29 +404,25 @@ Instead of the `FD .. FE` sequence, the `FD .. FD FF` can be used. In this case,
 into the data part. This means that all possible values are allowed for the values that would be defined
 for on top of the similarity.
 
-    00
-        FE
+    00 FE
         01
-            FE
-            FF
+            FE FF
         07
-        FF
-    01
-        FE
-        02
-            FE
-            01
-                FE
+    FF
+    01 FE
+        02 FE
+            01 FE
                 01
                     FE FF
                 03
                     FD FE
                     01
                     00 80
-                FF
             FF
+        FF
         03
             FD 01 01 FD FF
+    FF
 
 Here, we define the standard operations and PWM with values up to 128 on pins 1 through 3. 
 Then, it uses the similarity to define fading from any value up to 128 to any value up to 
