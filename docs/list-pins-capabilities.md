@@ -64,6 +64,13 @@ For example, a board that has pins 0, 3, 4, 7, 9, 10, 11, 12 and 13 would respon
 
     00 00 03 04 07 07 09 0D
 
+Or formatted slightly differently:
+
+    00 00
+    03 04
+    07 07
+    09 0D
+
 There are several additional rules for consistency:
 
 - Ranges should always go from the lower pin number to a higher one. So, the first
