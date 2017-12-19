@@ -59,11 +59,10 @@ The board responds with ranges of pin numbers it has. It sends pairs of bytes, w
 each first byte of a pair designates the beginning of a range and the second byte
 designates the end of the range. Single pins that aren't part of a range are
 represented by having its pin number listed twice (as the begin and end of a range).
-Finally, the response is terminated with `FF`.
 
 For example, a board that has pins 0, 3, 4, 7, 9, 10, 11, 12 and 13 would respond with:
 
-    00 00 03 04 07 07 09 0D FF
+    00 00 03 04 07 07 09 0D
 
 There are several additional rules for consistency:
 
@@ -115,12 +114,12 @@ The idea is simple. During the command part, you just list the byte that would b
 used in a call to state that it's a capability of the board. Then you can use `FE`
 to "jump into" that byte and specify which parts of the byte sequence so far are
 supported, or just continue if the entire byte sequence is supported. `FF` can be
-used to terminate "go back up a level". The response is also terminated with an `FF`.
+used to terminate "go back up a level".
 
 If that sounded complicated, here's an example. It is for a board that supports
 only `00 01`, `00 02`, `00 03` and `00 04`. (This is less than the mandatory calls.)
 
-    00 FE 01 02 03 04 FF FF
+    00 FE 01 02 03 04 FF
 
 Or, here's the same thing formatted a little differently:
 
@@ -131,13 +130,11 @@ Or, here's the same thing formatted a little differently:
         03
         04
         FF
-    FF
     
 It starts with claiming mode `00`. Then it jumps into that mode using `FE` and
 lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins length),
 `03` (list pins) and `04` (list capabilities length). Then, it 
-says it's done with mode `00` by sending a `FF`. Finally, it says it's done by sending
-another `FF`.
+says it's done with mode `00` by sending a `FF`.
 
 You can also use more `FE`'s to go into deeper levels. Even if an operation is multiple
 bytes, you will always use `FE` to step into a single byte. On top of that, you can use
@@ -168,7 +165,6 @@ temporarily) and `00 0B` (reset I2C address). It also supports digital set
             14
             FF
         FF
-    FF
 
 In this example, we start by defining what we can do in mode `00`. There we can
 do the range from `01` to `07`, `09`, `0A` and `0B`. The `FF` signifies that we're done
@@ -177,8 +173,7 @@ with mode `00`.
 Next up is mode `01`, here we look at operation `01` and enter it using `FE`. We
 support this operation on the pin range 1 to 5, the pin 7 and the pin range 10 to
 20 (in hexadecimal). Finally, there are three `FF`'s. The first is to exit `01 01`
-and drops us back to `01`. The second drops out of that as well. The third
-signifies the end of the answer.
+and drops us back to `01`. The second drops out of that as well.
 
 For data, it works slightly different. When you step into the data part of an operation,
 you do so with the sequence of `FD FE` instead of just `FE`. The next thing in the message
@@ -245,7 +240,6 @@ pins.
                 FF
             FF
         FF
-    FF
 
 As always, we start off with the obligatory calls. After we exit mode `00`, we enter
 mode `01` and immediately continue to operation `01 01`. There, we define pin range 1-3
@@ -264,8 +258,8 @@ for 100) as the minimum value for frequency. Next, we define `FF` as the maximum
 value and `C8` (hexadecimal for 200) as the maximum for frequency. In order to say
 "anything for value" we just gave it the range of 0-255. We drop out of the data
 block automatically and enter it again immediately to define another range. This time
-we define a single value for the frequency by giving it the range of 32-32. Then, we
-drop out of everything we're still in, and then close off the response with `FF`.
+we define a single value for the frequency by giving it the range of 32-32. Finally, we
+drop out of everything we're still in.
 
 ### Identical parts of the protocol ###
 
@@ -334,7 +328,6 @@ Let's show this in some examples.
         FF
     03
         FD 02 FF
-    FF
 
 The above example starts off with defining the mandatory operations. Then, it declares that it can
 use SoftPWM on pins 1 to 5, but only with frequencies above 128 (`80` in hexadecimal). Next, it
@@ -372,7 +365,6 @@ right now.
         02
             FD 01 02 01 FF
         FF
-    FF
 
 This example defines the mandatory operations, as well as PWM on pins 1 through 3 (with any data)
 as well as SoftPWM on pins 1 through 5 (with any data as well). For the set default, it uses the
@@ -420,7 +412,6 @@ the new time value to get all defined data values.
             FD 01 01 FE
             01
             01 0A
-    FF
 
 Here, we define the standard operations and PWM with any value on pins 1 through 3. Then, it uses the
 similarity to define fading from any value to any value with time within 1 and 10.
@@ -452,7 +443,6 @@ for on top of the similarity.
             FF
         03
             FD 01 01 FD FF
-    FF
 
 Here, we define the standard operations and PWM with values up to 128 on pins 1 through 3. 
 Then, it uses the similarity to define fading from any value up to 128 to any value up to 
