@@ -46,14 +46,14 @@ List Pins
 The list pins call will have different lengths for different boards. That's why a client
 should first request the length of the list pins call. This is done through a simple call:
 
-    00 02
+    00 03
 
 The board should respond with a single byte containing the number of bytes that the answer
 this board gives to the list pins call (`00 03`).
 
 The list pins call  itself is also pretty simple. The client makes this call:
 
-    00 03
+    00 04
 
 The board responds with ranges of pin numbers it has. It sends pairs of bytes, where
 each first byte of a pair designates the beginning of a range and the second byte
@@ -97,7 +97,7 @@ different boards and board versions. That's why there's once again a separate ca
 to get the length of the response for this board. This is done through the following
 call:
 
-    00 04
+    00 05
 
 The client will respond with two bytes which combined in big-endian fashion represent
 the length of the list capabilities call. It's not truly expected that many boards will
@@ -108,7 +108,7 @@ Next, there is the call to list the capabilities of a board. The response to thi
 is more complicated because it is pretty dense in information, but the call itself is
 rather simple:
 
-    00 03
+    00 06
 
 ### The response ###
 
