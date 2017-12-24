@@ -138,24 +138,24 @@ Or, here's the same thing formatted a little differently:
     FF
     
 It starts with claiming mode `00`. Then it jumps into that mode using `FE` and
-lists the parts of that mode it supports. It supports `01` (ping), `02` (list pins length),
-`03` (list pins) and `04` (list capabilities length). Then, it 
-says it's done with mode `00` by sending a `FF`.
+lists the parts of that mode it supports. It supports `01` (ping), `02` (protocol version)
+`03` (list pins length) and `04` (list pins). Then, it says it's done with mode `00` by 
+sending a `FF`.
 
 You can also use more `FE`'s to go into deeper levels. Even if an operation is multiple
 bytes, you will always use `FE` to step into a single byte. On top of that, you can use
 `FE FF` to use a range instead of just a single value. Let's look at a device that
-supports the mandatory calls, `00 09` (set I2C address) `00 0A` (set I2C address
-temporarily) and `00 0B` (reset I2C address). It also supports digital set
+supports the mandatory calls, `00 0A` (set I2C address) `00 0B` (set I2C address
+temporarily) and `00 0C` (reset I2C address). It also supports digital set
 (`01 01`) on pins 1 through 5, pin 7 and pins 10 through 20.
 
     00 FE
         01
             FE FF
-        07
-        09
+        08
         0A
         0B
+        0C
     FF
     01 FE
         01 FE
@@ -170,7 +170,7 @@ temporarily) and `00 0B` (reset I2C address). It also supports digital set
     FF
 
 In this example, we start by defining what we can do in mode `00`. There we can
-do the range from `01` to `07`, `09`, `0A` and `0B`. The `FF` signifies that we're done
+do the range from `01` to `08`, `0A`, `0B` and `0C`. The `FF` signifies that we're done
 with mode `00`.
 
 Next up is mode `01`, here we look at operation `01` and enter it using `FE`. We
@@ -205,7 +205,7 @@ pins.
     00 FE
         01
             FE FF
-        07
+        08
     FF
     01 FE
         02 FE
@@ -301,7 +301,7 @@ Let's show this in some examples.
         01
             FE
             FF
-        07
+        08
     FF
     01 FE
         02 FE
@@ -333,7 +333,7 @@ right now.
     00 FE
         01
             FE FF
-        07
+        08
     FF
     01 FE
         02 FE
@@ -381,7 +381,7 @@ the new time value to get all defined data values.
     00 FE
         01
             FE FF
-        07
+        08
     FF
     01 FE
         02 FE
@@ -407,7 +407,7 @@ for on top of the similarity.
     00 FE
         01
             FE FF
-        07
+        08
     FF
     01 FE
         02 FE
