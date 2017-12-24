@@ -3,7 +3,7 @@ x-board-protocol
 ================
 
 This is the protocol for the x-board project, which defines a way to communicate
-with x-board extension boards over I2C. The x-boars project itself aims to
+with x-board extension boards over I2C. The x-board project itself aims to
 implement this protocol for small development boards, letting you use them as extension
 boards to complement single-board computers. However, others are free to implement
 this protocol as well.
