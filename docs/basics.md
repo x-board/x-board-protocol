@@ -55,17 +55,6 @@ They are valid for use in data bytes.
 
 A way of supporting variable amounts of data is still being looked at.
 
-Lengths
--------
-
-(Note: I'm planning to get rid of this part of the protocol all together.)
-
-Initially, only the first byte is examined. If that byte isn't `FD`, `FE` or `FF`, the value is
-taken as the length. `FD` and `FE` are reserved values and simply shouldn't occur here. If this
-byte is `FF`, the next byte is read and it's taken as the number of bytes that will be used to
-define the length. Then, that number of bytes are read and these bytes are combined Big-Endian
-and their combined value is used as the length.
-
 
 Modes: 00
 ---------
