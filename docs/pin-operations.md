@@ -12,10 +12,13 @@ Mode 01 is "SET" and sets pins to a certain state. This is planned to be somethi
         Type 02: SoftPWM (set frequency?)
     01 03 <type> <pin> <from-value> <to-value> <time>: Fade to value in time (min / max is digital at end?)
         Type: same as for 01 01
-    01 04 <pin> <blink-type> [<fade-type>] <on-time> <off-time> [<action-time>]: blink with time as frequency and type as blink type
+    01 04 <blink-type> [<fade-type>] <limitation-type> <pin> <on-time> <off-time> [<action-time>] [<limitation-value]: blink with time as frequency and type as blink type
         Blink type 00: on/off (no action time) 
         Blink type 01: fade (action time is length of fade)
             Fade type: same as for 01 01
+        Limitation type 00: None, keep blinking indefinitely (no limitation-value)
+        Limitation type 01: Count, blink limitation-value times
+        Limitation type 02: Time, blink limitation-value seconds
 
 Mode 02 is "SET DEFAULT". Its usage is the same as 01, but instead of setting the pin to a state
 right now, sets what the default is, which is triggered when the board is powered up.
