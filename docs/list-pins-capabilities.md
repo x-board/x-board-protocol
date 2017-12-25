@@ -178,6 +178,10 @@ support this operation on the pin range 1 to 5, the pin 7 and the pin range 10 t
 20 (in hexadecimal). Finally, there are three `FF`'s. The first is to exit `01 01`
 and drops us back to `01`. The second drops out of that as well.
 
+For any operation that the board signals that it supports, it is implied that any
+value can be given for the data part of the call. There is no way to specify in the
+list capabilities response that only some values are allowed for the data part.
+
 ### The canonical response ###
 
 There are usually multiple ways to write a response for the same set of functionality.
