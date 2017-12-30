@@ -8,8 +8,9 @@ Mode 01 is "SET" and sets pins to a certain state. This is planned to be somethi
 
     01 01 <pin> <value>: digital; set pin to high (value == 01) or low (value == 00)
     01 02 <type> <pin> <value>: analog
-        Type 01: PWM
-        Type 02: SoftPWM (set frequency?)
+        Type 01: Any analog (PWM with SoftPWM as fallback, possibly other methods as well in the future)
+        Type 02: PWM
+        Type 03: SoftPWM (set frequency?)
     01 03 <type> <pin> <from-value> <to-value> <time>: Fade to value in time (min / max is digital at end?)
         Type: same as for 01 01
     01 04 <blink-type> [<fade-type>] <pin> <on-time> <off-time> [<action-time>]: blink with time as frequency and type as blink type
